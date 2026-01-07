@@ -1,11 +1,12 @@
 import matplotlib.pyplot as plt
 from matplotlib.ticker import FuncFormatter
+import pandas as pd
 
 
 class Visual:
     """Класс для визуализации графиков."""
 
-    def paid_plt(self, df_emp):
+    def paid_plt(self, df_emp:pd.DataFrame):
         """Метод для визуализации графиков."""
 
         mrf = (

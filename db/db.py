@@ -32,7 +32,7 @@ class DataBase:
                         dataframes_by_type[col] = df[["Таб. №", col]].dropna()
 
         merged_employees = employee_data[["Таб. №"]].drop_duplicates()
-        for col_name, df_part in dataframes_by_type.items():
+        for _, df_part in dataframes_by_type.items():
             merged_employees = pd.merge(
                 merged_employees, df_part, on="Таб. №", how="outer"
             )
