@@ -1,3 +1,4 @@
+import sqlite3
 import pandas as pd
 import glob
 import os
@@ -32,7 +33,7 @@ class DataBase:
                         dataframes_by_type[col] = df[["Таб. №", col]].dropna()
 
         merged_employees = employee_data[["Таб. №"]].drop_duplicates()
-        for col_name, df_part in dataframes_by_type.items():
+        for _, df_part in dataframes_by_type.items():
             merged_employees = pd.merge(
                 merged_employees, df_part, on="Таб. №", how="outer"
             )
@@ -75,3 +76,8 @@ class DataBase:
         df = pd.merge(df, insurance, on=["РФ"], how="left")
 
         return df
+
+    def df_from_db(self, db: pd.DataFrame):
+        conn = sqlite3.connect("db.sqlite3")
+        db.to_sql("peoples", conn, if_exists="replace", index=False)
+        conn.close()

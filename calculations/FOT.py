@@ -1,17 +1,20 @@
+import pandas as pd
+
+
 class FOT:
     """Класс для расчетов ФОТ."""
 
-    def calc_FOT(self, emp_df, vac_df):
+    def calc_FOT(self, emp_df: pd.DataFrame, vac_df: pd.DataFrame):
         """Расчет ФОТ."""
 
-        def process_df(df):
+        def process_df(df: pd.DataFrame):
             """Функция для расширения датафрейма."""
 
             df["Процент премирования"] = (
                 1
                 + (
-                    df["Процент месячной премии"] * 11 / 12
-                    + df["Процент квартальной премии"] * 9 / 12
+                    df["Процент месячной премии"] * (11 / 12)
+                    + df["Процент квартальной премии"] * (9 / 12)
                     + df["Процент годовой премии"]
                 )
                 / 100

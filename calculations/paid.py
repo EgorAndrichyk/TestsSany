@@ -1,12 +1,15 @@
 from datetime import timedelta
 from constants.constants import FORMAT_DATA, TODAY
 import pandas as pd
+import logging
+
+logger = logging.getLogger("MyApp")
 
 
 class Paid:
     """Класс для расчетов повышения оплаты."""
 
-    def calc_paid(self, df_emp):
+    def calc_paid(self, df_emp: pd.DataFrame):
         """Класс для расчетов проплаченности."""
 
         df_emp["Проплаченность"] = df_emp["ФОТ"] / df_emp["ФОТ по рынку"]
@@ -16,11 +19,25 @@ class Paid:
             pd.Timestamp(pd.to_datetime(TODAY, format=FORMAT_DATA))
             - timedelta(days=180)
         ).date()
+
         df_emp["Дата последнего повышения"] = pd.to_datetime(
-            df_emp["Дата последнего повышения"], format="%Y-%m-%d"
-        ).dt.date
+            df_emp["Дата последнего повышения"], format="%Y-%m-%d", errors="coerce"
+        )
+
+        def safe_date(x):
+            if pd.isna(x):
+                return None
+            return x.date()
+
+        df_emp["Дата последнего повышения"] = df_emp["Дата последнего повышения"].apply(
+            safe_date
+        )
+
+        valid_dates_mask = df_emp["Дата последнего повышения"].notna()
+
         mask = (
             (df_emp["Проплаченность"] < 0.8)
+            & valid_dates_mask
             & (df_emp["Дата последнего повышения"] < six_month)
             & (df_emp["Стаж"] > 1)
             & (df_emp["Кол-во единиц"] > 0.5)
@@ -31,9 +48,8 @@ class Paid:
 
         return df_emp
 
-    def increase_salary(self, df_emp, limit):
+    def increase_salary(self, df_emp: pd.DataFrame, limit: int):
         """Метод для расчетов повышения оплаты."""
-
         mask = df_emp["Рекомендации к повышению оплаты"] == "Рекомендуется"
 
         df_emp.loc[mask, "Повышение оплаты"] = (
@@ -41,24 +57,31 @@ class Paid:
         ).round(2)
         df_emp.loc[~mask, "Повышение оплаты"] = 0
 
-        if df_emp["Повышение оплаты"].sum() > limit:
-            print(
-                f"Лимит превышен на {(df_emp['Повышение оплаты'].sum() - limit).round(2)}, уменьшаем оплату пропорционально"
+        total_increase = df_emp["Повышение оплаты"].sum()
+
+        if total_increase > limit:
+            logger.info(
+                f"Лимит превышен на {(total_increase - limit):.2f}, уменьшаем оплату пропорционально"
             )
 
-            percent = (
-                (df_emp["Повышение оплаты"].sum() - limit)
-                / df_emp["Повышение оплаты"].sum()
-                * 100
-            )
+            percent = (total_increase - limit) / total_increase * 100
             df_emp["Повышение оплаты"] = df_emp["Повышение оплаты"] - (
                 df_emp["Повышение оплаты"] / 100 * percent
             )
-
+            total_increase = df_emp["Повышение оплаты"].sum()
+            excess = total_increase - limit
+            remaining = 0
         else:
-            print(
-                f"Остаток лимита: {(limit - df_emp['Повышение оплаты'].sum()).round(2)}"
-            )
+            excess = 0
+            remaining = limit - total_increase
 
-        print(f"Сумма повышений составила: {df_emp['Повышение оплаты'].sum()}")
-        return df_emp
+        logger.info(f"Сумма повышений составила: {total_increase:.2f}")
+
+        stats = {
+            "limit": limit,
+            "total_increase": total_increase,
+            "excess": excess,
+            "remaining": remaining,
+        }
+
+        return df_emp, stats
