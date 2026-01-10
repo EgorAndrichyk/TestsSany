@@ -15,6 +15,7 @@ def main():
     calc = Calc()
     result_emp, _ = calc.calculate_from_main(limit)
     calc.df_from_db(result_emp)
+    
     logger.info(f"Расчет завершён. Результат содержит {len(result_emp)} строк.")
 
 

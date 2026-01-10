@@ -36,13 +36,9 @@
                 <div class="alert alert-info mt-3">
                     <h5>Статистика расчета:</h5>
                     <ul class="mb-0">
-                        <li><strong>Лимит:</strong> {{ stats.limit|intcomma }} руб.</li>
+                        <li><strong>Лимит:</strong> {{ stats.limit|floatformat:2|intcomma }} руб.</li>
                         <li><strong>Сумма повышений:</strong> {{ stats.total_increase|floatformat:2|intcomma }} руб.</li>
-                        {% if stats.excess > 0 %}
-                            <li class="text-danger"><strong>Превышение лимита:</strong> {{ stats.excess|floatformat:2|intcomma }} руб.</li>
-                        {% else %}
-                            <li class="text-success"><strong>Остаток лимита:</strong> {{ stats.remaining|floatformat:2|intcomma }} руб.</li>
-                        {% endif %}
+                        <li class="text-success"><strong>Остаток лимита:</strong> {{ stats.remaining|floatformat:2|intcomma }} руб.</li>
                     </ul>
                 </div>
                 {% endif %}

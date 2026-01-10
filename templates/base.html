@@ -15,11 +15,17 @@
                 <div class="container-fluid">
                     <a class="navbar-brand fw-bold" href="/">Система управления персоналом</a>
                     {% if user.is_authenticated %}
-                        <div class="d-flex align-items-center">
-                            <span class="me-3">Привет, {{ user.username }}!</span>
-                            <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary btn-sm">Личный кабинет</a>
-                            <a href="{% url 'logout' %}" class="btn btn-outline-secondary btn-sm">Выйти</a>
-                        </div>
+                        {% with employee=user.employee %}
+                            <div class="d-flex align-items-center">
+                                {% if employee %}
+                                    <span class="me-3">Привет, {{ employee.get_full_name }}!</span>
+                                    <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary btn-sm">Личный кабинет</a>
+                                {% else %}
+                                    <span class="me-3">Привет, {{ user.username }}!</span>
+                                {% endif %}
+                                <a href="{% url 'logout' %}" class="btn btn-outline-secondary btn-sm">Выйти</a>
+                            </div>
+                        {% endwith %}
                     {% endif %}
                 </div>
             </nav>

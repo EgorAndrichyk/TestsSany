@@ -64,12 +64,15 @@ class RegisterView(View):
             password=password
         )
 
-        _ = Employee.objects.create(
+        employee = Employee.objects.create(
             user=user,
             tab_number=tab_number,
             is_budgetolog=is_budgetolog == 'on'
         )
-
+        person = People.objects.get(tab_number=employee.tab_number)
+        full_name = person.full_name
+        user.username = full_name
+        
         messages.success(request, f"Регистрация успешна! Логин: {tab_number}, Пароль: {password}")
         return redirect('login')
 

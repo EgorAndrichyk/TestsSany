@@ -8,6 +8,13 @@ class Employee(models.Model):
     tab_number = models.CharField(max_length=20, unique=True, verbose_name="Таб. №")
     is_budgetolog = models.BooleanField(default=False, verbose_name="Бюджетолог")
 
+    def get_full_name(self):
+        try:
+            person = People.objects.get(tab_number=self.tab_number)
+            return person.full_name
+        except People.DoesNotExist:
+            return "ФИО не найдено"
+        
     def __str__(self):
         return (
             f"{self.tab_number} ({'Бюджетолог' if self.is_budgetolog else 'Сотрудник'})"
